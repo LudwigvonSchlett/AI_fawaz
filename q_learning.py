@@ -7,6 +7,11 @@ import time
 
 from numpy.ma.extras import average
 
+def epsilon_linear_decrease(epsilon, min_epsilon, reduction ):
+    return max(epsilon - reduction, min_epsilon)
+
+def epsilon_exponential_decrease(epsilon, min_epsilon, reduction ):
+    return max(epsilon * reduction, min_epsilon)
 
 def update_q_table(Q, s, a, r, sprime, alpha, gamma):
     """
@@ -44,11 +49,15 @@ if __name__ == "__main__":
 
     gamma = 0.8  # choose your own
 
-    epsilon = 0.2  # choose your own
+    epsilon = 0.8  # choose your own
+    minimum_epsilon = 0.05
+    red_lin = 0.00005
+    red_exp = 0.9999
 
-    n_epochs = 5000  # choose your own
+    n_epochs = 25000  # choose your own
     max_itr_per_epoch = 500  # choose your own
     rewards = []
+    epsilons = []
 
     for e in range(n_epochs):
         r = 0
@@ -71,6 +80,10 @@ if __name__ == "__main__":
             if done:
                 break
 
+        epsilons.append(epsilon)
+        #epsilon = epsilon_linear_decrease(epsilon, minimum_epsilon, red_lin)
+        epsilon = epsilon_exponential_decrease(epsilon, minimum_epsilon, red_exp)
+
         print("episode #", e, " : r = ", r)
 
         rewards.append(r)
@@ -80,6 +93,7 @@ if __name__ == "__main__":
     fqrt = np.quantile(rewards, 0.25)
     lqrt = np.quantile(rewards, 0.75)
 
+    print("")
 
     print("Average reward = ", avr )
     print("Median reward = ", med )
@@ -102,6 +116,14 @@ if __name__ == "__main__":
     plt.grid(True)
     plt.show()
 
+    plt.plot(epochs, epsilons,'+', label="epsilon", color="b")
+    plt.title("epsilon en fonction du nombre d'époques")
+    plt.xlabel("epochs")
+    plt.ylabel("epsilon")
+    plt.legend()
+    plt.grid(True)
+    plt.show()
+
     print("Training finished.\n")
 
     """
@@ -109,5 +131,7 @@ if __name__ == "__main__":
     Evaluate the q-learning algorihtm
 
     """
+
+
 
     env.close()
