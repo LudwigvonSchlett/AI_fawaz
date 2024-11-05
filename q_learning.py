@@ -5,6 +5,8 @@ from IPython.display import clear_output
 import matplotlib.pyplot as plt
 import time
 
+from numpy.ma.extras import average
+
 
 def update_q_table(Q, s, a, r, sprime, alpha, gamma):
     """
@@ -44,7 +46,7 @@ if __name__ == "__main__":
 
     epsilon = 0.2  # choose your own
 
-    n_epochs = 50000  # choose your own
+    n_epochs = 5000  # choose your own
     max_itr_per_epoch = 500  # choose your own
     rewards = []
 
@@ -73,14 +75,27 @@ if __name__ == "__main__":
 
         rewards.append(r)
 
-    print("Average reward = ", np.mean(rewards))
-    print("Median reward = ", np.median(rewards))
+    avr = np.mean(rewards)
+    med = np.median(rewards)
+    fqrt = np.quantile(rewards, 0.25)
+    lqrt = np.quantile(rewards, 0.75)
+
+
+    print("Average reward = ", avr )
+    print("Median reward = ", med )
+    print("First Quartile = ", fqrt )
+    print("Last Quartile = ", lqrt )
 
 
     # plot the rewards in function of epochs
 
     epochs = list(range(1, n_epochs + 1))
-    plt.plot(epochs, rewards, label="rewards per epoch", color="b")
+    plt.plot(epochs, rewards,'+', label="rewards per epoch", color="b")
+    plt.axhline(y=avr, color="k", linestyle="--", label="average reward")
+    plt.axhline(y=lqrt, color="r", linestyle="--", label="last quartile")
+    plt.axhline(y=med, color="r", linestyle="--", label="median reward")
+    plt.axhline(y=fqrt, color="r", linestyle="--", label="first quartile")
+    plt.title("récompense en fonction du nombre d'époques")
     plt.xlabel("epochs")
     plt.ylabel("rewards")
     plt.legend()
